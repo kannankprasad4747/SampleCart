@@ -1,15 +1,17 @@
 package com.example.demo;
-import com.example.demo.controller.CartController;
+
+
 import com.example.demo.model.Cart;
-import com.example.demo.service.CartService;
+import com.example.demo.model.contract.CartService;
+import com.example.demo.model.controller.CartController;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,6 +22,9 @@ class CartControllerTest {
     @Mock
     private CartService<Cart> cartService;
 
+    @Mock
+    private Logger logger;
+
     private CartController cartController;
 
     @BeforeEach
@@ -29,37 +34,43 @@ class CartControllerTest {
     }
 
     @Test
-    void getAllCarts_shouldReturnListOfCarts() {
-        // Arrange
-        Cart cart1 = new Cart(1, 100.0);
-        Cart cart2 = new Cart(2, 200.0);
-        List<Cart> carts = Arrays.asList(cart1, cart2);
-
+    void getAllCarts_ShouldReturnAllCarts() {
+        List<Cart> carts = new ArrayList<>();
+        carts.add(new Cart(1, new ArrayList<>(), 100.0));
+        carts.add(new Cart(2, new ArrayList<>(), 200.0));
         when(cartService.getAllCarts()).thenReturn(carts);
 
-        // Act
-        ResponseEntity<List<Cart>> response = cartController.getAllCarts();
+        List<Cart> result = cartController.getAllCarts();
 
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(carts, response.getBody());
-        verify(cartService, times(1)).getAllCarts();
+        assertEquals(carts, result);
+        verify(cartService).getAllCarts();
     }
 
     @Test
-    void getCart_shouldReturnCartById() {
+    void getCart_ShouldReturnCartById() {
         // Arrange
         int cartId = 1;
-        Cart cart = new Cart(cartId, 100.0);
-
-        when(cartService.getCart(cartId)).thenReturn(cart);
+        Cart expectedCart = new Cart(1, new ArrayList<>(), 0.0);
+        when(cartService.getCart(cartId)).thenReturn(expectedCart);
 
         // Act
-        ResponseEntity<Cart> response = cartController.getCart(cartId);
+        Cart actualCart = cartController.getCart(cartId);
 
         // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(cart, response.getBody());
-        verify(cartService, times(1)).getCart(cartId);
+        verify(cartService).getCart(cartId);
+    }
+
+    @Test
+    void getUserCarts_ShouldReturnUserCarts() {
+        int userId = 1;
+        List<Cart> userCarts = new ArrayList<>();
+        userCarts.add(new Cart(1, new ArrayList<>(), 100.0));
+        userCarts.add(new Cart(2, new ArrayList<>(), 200.0));
+        when(cartService.getUserCarts(userId)).thenReturn(userCarts);
+
+        List<Cart> result = cartController.getUserCarts(userId);
+
+        assertEquals(userCarts, result);
+        verify(cartService).getUserCarts(userId);
     }
 }

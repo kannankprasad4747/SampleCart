@@ -4,45 +4,56 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.example.demo.model.contract.UserService;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Service
-public class UserServiceImpl<U> implements UserService<U> {
+public class UserServiceImpl<User> implements UserService<User> {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-	private static final String API_BASE_URL = "https://dummyjson.com/";
+    private static final String API_BASE_URL = "https://dummyjson.com/";
 
-	private final RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-	public UserServiceImpl(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
+    public UserServiceImpl(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
-	@Override
-	public List<U> getAllUsers() {
-		String url = API_BASE_URL + "users";
-		logger.info("Getting all users from URL: {}", url);
-		U[] users = restTemplate.getForObject(url, (Class<U[]>) Object[].class);
-		return Arrays.asList(users);
-	}
+    @Override
+    public List<User> getAllUsers() {
+        String url = API_BASE_URL + "users";
+        ResponseEntity<User> response = restTemplate.getForEntity(url, (Class<User>) Object.class);
+        User user = response.getBody();
+        System.out.println("ll "+response.getBody()  );
+        List<User> users= new ArrayList<>();
+        users.add(user);
+        return users;
+    }
 
-	@Override
-	public U getUser(Integer userId) {
-		String url = API_BASE_URL + "users/" + userId;
-		logger.info("Getting user with ID: {} from URL: {}", userId, url);
-		return restTemplate.getForObject(url, (Class<U>) Object.class);
-	}
+    @Override
+    public User getUser(Integer userId) {
+        String url = API_BASE_URL + "users/" + userId;
+        ResponseEntity<User> response = restTemplate.getForEntity(url, (Class<User>) Object.class);
+        return response.getBody();
+    }
 
-	@Override
-	public List<U> searchUsers(String query) {
-		String url = API_BASE_URL + "users/search?q=" + query;
-		logger.info("Searching users with query: {} from URL: {}", query, url);
-		U[] users = restTemplate.getForObject(url, (Class<U[]>) Object[].class);
-		return Arrays.asList(users);
-	}
-
-	// Implement other methods...
-
+    @Override
+    public List<User> searchUsers(String query) {
+        String url = API_BASE_URL + "users/search?q=" + query;
+//        ResponseEntity<List<User>> response = restTemplate.exchange(url, HttpMethod.GET, null,
+//                new ParameterizedTypeReference<List<User>>() {});
+        ResponseEntity<User> response = restTemplate.getForEntity(url, (Class<User>) Object.class);
+        User user = response.getBody();
+        List<User> users= new ArrayList<>();
+        users.add(user);
+        return users;
+    }
 }

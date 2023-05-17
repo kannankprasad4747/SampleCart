@@ -5,13 +5,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.app.AbstractTestMartAppFeatures;
+import com.example.demo.model.Cart;
+import com.example.demo.model.Category;
+import com.example.demo.model.Product;
+import com.example.demo.model.contract.CartService;
+import com.example.demo.model.contract.ProductService;
+
 import java.util.Comparator;
 import java.util.List;
 
 @Component
 public class TestMartAppFeatures extends AbstractTestMartAppFeatures {
 
-	private static final Logger logger = LoggerFactory.getLogger(TestMartAppFeatures.class);
+	public static  Logger logger = LoggerFactory.getLogger(TestMartAppFeatures.class);
 
 	private final ProductService<Product, Category> productService;
 	private final CartService<Cart> cartService;

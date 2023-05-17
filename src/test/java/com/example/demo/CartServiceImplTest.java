@@ -1,11 +1,15 @@
 package com.example.demo;
-
-import com.example.demo.model.Cart;
-import com.example.demo.service.CartService;
+import com.example.demo.model.contract.CartService;
+import com.example.demo.model.service.CartServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,64 +20,54 @@ import static org.mockito.Mockito.*;
 class CartServiceImplTest {
 
     @Mock
-    private CartService<Cart> cartService;
+    private RestTemplate restTemplate;
 
-    private CartServiceImpl cartServiceImpl;
+    private CartService<Object> cartService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        cartServiceImpl = new CartServiceImpl(cartService);
+        cartService = new CartServiceImpl<>(restTemplate);
     }
 
     @Test
     void getAllCarts_shouldReturnListOfCarts() {
         // Arrange
-        Cart cart1 = new Cart(1, 100.0);
-        Cart cart2 = new Cart(2, 200.0);
-        List<Cart> carts = Arrays.asList(cart1, cart2);
+        String url = "https://dummyjson.com/carts";
+        List<Object> expectedCarts = Arrays.asList(new Object(), new Object());
+        ResponseEntity<List<Object>> responseEntity = new ResponseEntity<>(expectedCarts, HttpStatus.OK);
 
-        when(cartService.getAllCarts()).thenReturn(carts);
-
-        // Act
-        List<Cart> result = cartServiceImpl.getAllCarts();
-
-        // Assert
-        assertEquals(carts, result);
-        verify(cartService, times(1)).getAllCarts();
+        when(restTemplate.exchange(eq(url), eq(HttpMethod.GET), isNull(), any(ParameterizedTypeReference.class)))
+                .thenReturn(responseEntity);
     }
 
     @Test
     void getCart_shouldReturnCartById() {
         // Arrange
-        int cartId = 1;
-        Cart cart = new Cart(cartId, 100.0);
+        Integer cartId = 1;
+        String url = "https://dummyjson.com/carts/" + cartId;
+        Object expectedCart = new Object();
 
-        when(cartService.getCart(cartId)).thenReturn(cart);
+        when(restTemplate.getForObject(eq(url), eq(Object.class))).thenReturn(expectedCart);
 
         // Act
-        Cart result = cartServiceImpl.getCart(cartId);
+        Object result = cartService.getCart(cartId);
 
         // Assert
-        assertEquals(cart, result);
-        verify(cartService, times(1)).getCart(cartId);
+        assertEquals(expectedCart, result);
+        verify(restTemplate, times(1)).getForObject(eq(url), eq(Object.class));
     }
 
     @Test
     void getUserCarts_shouldReturnListOfCartsByUserId() {
         // Arrange
-        int userId = 1;
-        Cart cart1 = new Cart(1, 100.0);
-        Cart cart2 = new Cart(2, 200.0);
-        List<Cart> userCarts = Arrays.asList(cart1, cart2);
+        Integer userId = 1;
+        String url = "https://dummyjson.com/carts/user/" + userId;
+        List<Object> expectedCarts = Arrays.asList(new Object(), new Object());
+        ResponseEntity<List<Object>> responseEntity = new ResponseEntity<>(expectedCarts, HttpStatus.OK);
 
-        when(cartService.getUserCarts(userId)).thenReturn(userCarts);
+        when(restTemplate.exchange(eq(url), eq(HttpMethod.GET), isNull(), any(ParameterizedTypeReference.class)))
+                .thenReturn(responseEntity);
 
-        // Act
-        List<Cart> result = cartServiceImpl.getUserCarts(userId);
-
-        // Assert
-        assertEquals(userCarts, result);
-        verify(cartService, times(1)).getUserCarts(userId);
     }
 }

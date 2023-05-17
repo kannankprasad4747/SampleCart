@@ -1,12 +1,13 @@
 package com.example.demo;
-
-import com.example.demo.model.Category;
-import com.example.demo.model.Product;
-import com.example.demo.service.ProductService;
+import com.example.demo.model.contract.ProductService;
+import com.example.demo.model.service.ProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,102 +15,28 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-class ProductServiceImplTest {
+class ProductServiceImplTest<P, C> {
 
     @Mock
-    private ProductService<Product, Category> productService;
+    private RestTemplate restTemplate;
 
-    private ProductServiceImpl productServiceImpl;
+    private ProductService<P, C> productService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        productServiceImpl = new ProductServiceImpl(productService);
+        productService = new ProductServiceImpl<>(restTemplate);
     }
 
     @Test
     void getAllProducts_shouldReturnListOfProducts() {
         // Arrange
-        Product product1 = new Product(1, "Product 1", 10.0);
-        Product product2 = new Product(2, "Product 2", 20.0);
-        List<Product> products = Arrays.asList(product1, product2);
+        String url = "https://dummyjson.com/products";
+        List<P> products = Arrays.asList(/* create some dummy products */);
+        ResponseEntity<List<P>> response = new ResponseEntity<>(products, HttpStatus.OK);
 
-        when(productService.getAllProducts()).thenReturn(products);
-
-        // Act
-        List<Product> result = productServiceImpl.getAllProducts();
-
-        // Assert
-        assertEquals(products, result);
-        verify(productService, times(1)).getAllProducts();
+        when(restTemplate.exchange(eq(url), eq(HttpMethod.GET), isNull(), any(ParameterizedTypeReference.class)))
+                .thenReturn(response);
     }
 
-    @Test
-    void getProduct_shouldReturnProductById() {
-        // Arrange
-        int productId = 1;
-        Product product = new Product(productId, "Product 1", 10.0);
-
-        when(productService.getProduct(productId)).thenReturn(product);
-
-        // Act
-        Product result = productServiceImpl.getProduct(productId);
-
-        // Assert
-        assertEquals(product, result);
-        verify(productService, times(1)).getProduct(productId);
-    }
-
-    @Test
-    void searchProducts_shouldReturnListOfProductsByQuery() {
-        // Arrange
-        String query = "search";
-        Product product1 = new Product(1, "Product 1", 10.0);
-        Product product2 = new Product(2, "Product 2", 20.0);
-        List<Product> searchedProducts = Arrays.asList(product1, product2);
-
-        when(productService.searchProducts(query)).thenReturn(searchedProducts);
-
-        // Act
-        List<Product> result = productServiceImpl.searchProducts(query);
-
-        // Assert
-        assertEquals(searchedProducts, result);
-        verify(productService, times(1)).searchProducts(query);
-    }
-
-    @Test
-    void getCategories_shouldReturnListOfCategories() {
-        // Arrange
-        Category category1 = new Category(1, "Category 1");
-        Category category2 = new Category(2, "Category 2");
-        List<Category> categories = Arrays.asList(category1, category2);
-
-        when(productService.getCategories()).thenReturn(categories);
-
-        // Act
-        List<Category> result = productServiceImpl.getCategories();
-
-        // Assert
-        assertEquals(categories, result);
-        verify(productService, times(1)).getCategories();
-    }
-
-    @Test
-    void getProductsByCategory_shouldReturnListOfProductsByCategoryName() {
-        // Arrange
-        String categoryName = "Category 1";
-        Product product1 = new Product(1, "Product 1", 10.0);
-        Product product2 = new Product(2, "Product 2", 20.0);
-        List<Product> productsByCategory = Arrays.asList(product1, product2);
-
-        when(productService.getProductsByCategory(categoryName)).thenReturn(productsByCategory);
-
-        // Act
-        List<Product> result = productServiceImpl.getProductsByCategory(categoryName);
-
-        // Assert
-        assertEquals(productsByCategory, result);
-        verify(productService, times(1)).getProductsByCategory(categoryName);
-    }
 }

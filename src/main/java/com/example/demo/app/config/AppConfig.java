@@ -1,9 +1,15 @@
 package com.example.demo.app.config;
 
 import org.springframework.context.annotation.Bean;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.demo.model.service.CartServiceImpl;
+import com.example.demo.model.service.ProductServiceImpl;
+import com.example.demo.model.service.UserServiceImpl;
+import com.example.demo.model.*;
+import com.example.demo.model.contract.*;
 @Configuration
 public class AppConfig {
 

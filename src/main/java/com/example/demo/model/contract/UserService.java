@@ -1,23 +1,25 @@
 package com.example.demo.model.contract;
 
+import java.util.List;
+
 // Note: the generic type parameter U is used to represent the type of the user.
-public interface UserService<U> {
+public interface UserService<User> {
 
 	/*
 	 * Get all users of TestMart
 	 * API endpoint to get data: https://dummyjson.com/users
 	 */
-	List<U> getAllUsers();
+	List<User> getAllUsers();
 
 	/*
 	 * Get a single user
 	 * API endpoint to get data: https://dummyjson.com/users/{userId}
 	 */
-	U getUser(Integer userId);
+	User getUser(Integer userId);
 
 	/*
 	 * Search users
 	 * API endpoint to get data: https://dummyjson.com/users/search?q={query}
 	 */
-	List<U> searchUsers(String query);
+	List<User> searchUsers(String query);
 }

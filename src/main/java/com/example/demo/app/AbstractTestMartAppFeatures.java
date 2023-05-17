@@ -1,3 +1,7 @@
+package com.example.demo.app;
+import java.util.List;
+
+import com.example.demo.model.*;
 // Note: Convert this class to concrete class and add implementation (missing body) to all methods. You will remove the word
 // `abstract` everywhere. This class is only kept `abstract` for the sake of interview exercise.
 public abstract class AbstractTestMartAppFeatures {

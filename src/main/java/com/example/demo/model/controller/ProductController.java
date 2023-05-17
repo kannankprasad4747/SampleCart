@@ -1,6 +1,5 @@
 package com.example.demo.model.controller;
 
-import com.example.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +8,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.model.Category;
+import com.example.demo.model.Product;
+import com.example.demo.model.contract.ProductService;
+
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
 
-	private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
+	public static  Logger logger = LoggerFactory.getLogger(ProductController.class);
 
 	private final ProductService<Product, Category> productService;
 
@@ -33,7 +37,18 @@ public class ProductController {
 	@GetMapping("/{productId}")
 	public Product getProduct(@PathVariable Integer productId) {
 		logger.info("Fetching product with ID: {}", productId);
-		return productService.getProduct(productId);
+		Object response = productService.getProduct(productId);
+		if(response instanceof LinkedHashMap<?,?>) {
+			LinkedHashMap<?, ?> productMap = (LinkedHashMap<?, ?>) response;
+		int id = 	(int) productMap.get("id");
+		double rating = (Double) productMap.get("rating");
+		String titile= (String)productMap.get("title");
+		List<String> images = (List<String>) productMap.get("images");
+		Product p = new Product(id,titile,rating,images);
+		return p;
+		}
+		
+		return null;
 	}
 
 	@GetMapping("/categories")

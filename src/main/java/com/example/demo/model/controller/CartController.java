@@ -1,6 +1,5 @@
 package com.example.demo.model.controller;
 
-import com.example.service.CartService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.model.Cart;
+import com.example.demo.model.Product;
+import com.example.demo.model.contract.CartService;
+
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @RestController
@@ -29,10 +33,27 @@ public class CartController {
 	}
 
 	@GetMapping("/{cartId}")
-	public Cart getCart(@PathVariable Integer cartId) {
-		logger.info("Fetching cart with ID: {}", cartId);
-		return cartService.getCart(cartId);
-	}
+	 public Cart getCart(@PathVariable Integer cartId) {
+        logger.info("Fetching cart with ID: {}", cartId);
+        Object response = cartService.getCart(cartId);
+
+        // Check if the response is a LinkedHashMap
+        if (response instanceof LinkedHashMap) {
+            LinkedHashMap<?, ?> cartMap = (LinkedHashMap<?, ?>) response;
+
+            // Retrieve the properties from the cartMap
+            int id = (Integer) cartMap.get("id");
+            List<Product> products = (List<Product>) cartMap.get("products");
+            double total = (Double.valueOf( (int)cartMap.get("total")));
+
+            // Create a new Cart object using the retrieved properties
+            Cart cart = new Cart(id, products, total);
+
+            return cart;
+        }
+
+        return null; // or throw an exception if needed
+    }
 
 	@GetMapping("/user/{userId}")
 	public List<Cart> getUserCarts(@PathVariable Integer userId) {

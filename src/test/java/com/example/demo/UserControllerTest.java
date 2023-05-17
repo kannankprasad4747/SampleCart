@@ -1,8 +1,8 @@
 package com.example.demo;
 
-import com.example.demo.controller.UserController;
 import com.example.demo.model.User;
-import com.example.demo.service.UserService;
+import com.example.demo.model.contract.UserService;
+import com.example.demo.model.controller.UserController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -14,9 +14,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-class UserControllerTest {
+public class UserControllerTest {
 
     @Mock
     private UserService<User> userService;
@@ -24,43 +26,64 @@ class UserControllerTest {
     private UserController userController;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
         userController = new UserController(userService);
     }
 
     @Test
-    void getAllUsers_shouldReturnListOfUsers() {
-        // Arrange
-        User user1 = new User(1, "John");
-        User user2 = new User(2, "Jane");
-        List<User> users = Arrays.asList(user1, user2);
+    public void testGetAllUsers() {
+        List<User> users = Arrays.asList(
+                new User(1, "John", "john@example.com", "password"),
+                new User(2, "Jane", "jane@example.com", "password")
+        );
 
         when(userService.getAllUsers()).thenReturn(users);
 
-        // Act
-        ResponseEntity<List<User>> response = userController.getAllUsers();
+        List<User> response = userController.getAllUsers();
 
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(users, response.getBody());
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(users, response);
+
         verify(userService, times(1)).getAllUsers();
+        verifyNoMoreInteractions(userService);
+    }
+
+
+    @Test
+    public void testGetUser_NotFound() {
+        int userId = 1;
+
+        when(userService.getUser(userId)).thenReturn(null);
+
+        ResponseEntity<User> response = userController.getUser(userId);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertTrue(response.getBody() == null);
+
+        verify(userService, times(1)).getUser(userId);
+        verifyNoMoreInteractions(userService);
     }
 
     @Test
-    void getUser_shouldReturnUserById() {
-        // Arrange
-        int userId = 1;
-        User user = new User(userId, "John");
+    public void testSearchUsers() {
+        String query = "John";
+        List<User> users = Arrays.asList(
+                new User(1, "John", "john@example.com", "password"),
+                new User(2, "Johnny", "johnny@example.com", "password")
+        );
 
-        when(userService.getUser(userId)).thenReturn(user);
+        when(userService.searchUsers(query)).thenReturn(users);
 
-        // Act
-        ResponseEntity<User> response = userController.getUser(userId);
+        List<User> response = userController.searchUsers(query);
 
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(user, response.getBody());
-        verify(userService, times(1)).getUser(userId);
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(users, response);
+
+        verify(userService, times(1)).searchUsers(query);
+        verifyNoMoreInteractions(userService);
     }
 }
